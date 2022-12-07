@@ -12,6 +12,7 @@ use AcquiaCloudApi\Endpoints\Applications;
 use AcquiaCloudApi\Endpoints\Crons;
 use AcquiaCloudApi\Endpoints\Environments;
 use AcquiaCloudApi\Endpoints\Servers;
+use AcquiaCloudApi\Response\OperationResponse;
 
 /**
  * Define commands in the acquia-cloud-crons:* namespace.
@@ -568,14 +569,21 @@ class AcquiaCloudCronTasksCommand extends BltTasks {
           // the leading '#' will automatically create it as disabled.
           $command = $cron['status'] ? $cron['command'] : '# ' . $cron['command'];
 
-          $crons_connector->update(
-            $this->environment_uuid,
-            $cron['id'],
-            $command,
-            $cron['frequency'],
-            $cron['label'],
-            $cron['server_id'] ?: null
-          );
+          // @TODO: Replace this by a proper $crons_connector->update() call
+          // once https://github.com/typhonius/acquia-php-sdk-v2/pull/290 is
+          // fixed. The patch does not apply on all versions of
+          // acquia-php-sdk-v2 so to avoid the headaches of dealing with
+          // multiple versions of the patch, we simply do a direct request
+          // instead of using the wrapper method.
+          $options = [
+            'json' => [
+              'command' => $command,
+              'frequency' => $cron['frequency'],
+              'label' => $cron['label'],
+              'server_id' => $cron['server_id'] ?: null,
+            ],
+          ];
+          $this->client->request('put', '/environments/' . $this->environment_uuid . '/crons/' . $cron['id'], $options);
 
           $this->logger->success('Scheduled task "' . $cron['label'] . '" (' . $cron['id'] . ') has been updated with success.');
         }

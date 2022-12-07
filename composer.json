@@ -12,8 +12,7 @@
         }
     ],
   "require": {
-    "typhonius/acquia-php-sdk-v2": "^2.5.0",
-    "cweagans/composer-patches": "^1.7"
+    "typhonius/acquia-php-sdk-v2": "^2.0.0"
   },
   "require-dev": {
     "acquia/blt": "^13"
@@ -21,17 +20,6 @@
   "autoload": {
     "psr-4": {
       "AcquiaCloudCronTasks\\": "./src/"
-    }
-  },
-  "extra": {
-    "blt": {
-      "update": true
-    },
-    "enable-patching": true,
-    "patches": {
-      "typhonius/acquia-php-sdk-v2": {
-        "Use PUT method for Crons Update": "https://patch-diff.githubusercontent.com/raw/typhonius/acquia-php-sdk-v2/pull/290.patch"
-      }
     }
   },
   "config": {
