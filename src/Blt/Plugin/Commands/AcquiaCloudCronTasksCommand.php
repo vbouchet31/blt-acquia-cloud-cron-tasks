@@ -411,9 +411,9 @@ class AcquiaCloudCronTasksCommand extends BltTasks {
    * @param array $options
    *   Options that can be passed via the CLI.
    *
-   * @command acquia-cloud-crons:update-cron-tasks
+   * @command acquia-cloud-cron-tasks:update
    *
-   * @aliases  ac:crons
+   * @aliases  acct:up
    *
    * @throws \Acquia\Blt\Robo\Exceptions\BltException
    */
@@ -457,20 +457,25 @@ class AcquiaCloudCronTasksCommand extends BltTasks {
       $this->logger->warning('This will be a dry run, scheduled tasks will not be altered.');
     }
 
-    // Identify the YML files which will be used to fetch configured crons.
+    // Identify the YML files which will be used to fetch crons and config.
     $this->files = $this->getYmlFiles($application);
 
     $this->getDefaultConfig($environment);
+
+    // Fetch the crons from the YML files.
+    $configured_crons = $this->getConfiguredCrons($environment);
+    $configured_crons = $this->normalizeConfiguredCrons($configured_crons);
+
+    // Exit early if no crons have been found in YML files.
+    if (empty($configured_crons)) {
+      throw new BltException('Impossible to find cron tasks in any of the following files: ' . implode(',', $this->files) . '. Please review your configuration.');
+    }
 
     // Fetch the crons from the API and normalize the format, so it can
     // easily be compared with the crons from the YML files.
     $crons_connector = new Crons($this->client);
     $acquia_crons = $crons_connector->getAll($this->environment_uuid);
     $acquia_crons = $this->normalizeAcquiaCrons($acquia_crons);
-
-    // Fetch the crons from the YML files.
-    $configured_crons = $this->getConfiguredCrons($environment);
-    $configured_crons = $this->normalizeConfiguredCrons($configured_crons);
 
     // Generate the diff between crons from the API and the crons from the
     // YML files to determine which ones to create, edit or delete.
