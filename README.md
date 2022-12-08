@@ -38,6 +38,9 @@ Running this command will:
 - Update the scheduled tasks which are different between Acquia Cloud and `blt.yml`. The
 mapping is done based on the task's label.
 - Create the tasks which are in `blt.yml` but not on Acquia Cloud.
+
+The mapping between tasks listed in the configuration and tasks installed on Acquia Cloud is done via the label.
+
 ## Advanced usage
 
 ### BLT command's options
@@ -204,8 +207,8 @@ In this example, the `Drupal cron` task will be disabled on `dev`, `dev2` and `d
 
 This option is only available with client's id and secret which belong to an advanced user. It allows
 to specify on which web server to execute the cron task on the production environment. By default,
-the cron task will be executed on any of the web server of the application. Some complex applications 
-which require many or heavy cron tasks can have one of the web server excluded from the load balancers
+the cron task will be executed on any of the web server of the application. Some complex applications, 
+which require many or heavy cron tasks, can have one of the web server excluded from the load balancers
 rotation and used to execute cron tasks only.
 
 ```yaml
