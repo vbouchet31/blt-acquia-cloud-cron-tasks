@@ -55,12 +55,12 @@ class AcquiaCloudCronTasksCommand extends BltTasks {
   protected string $application_uuid;
 
   /**
-   * The constructor.
+   * Helper function to prepare the Client to connect Acquia Cloud API.
    */
-  public function __construct() {
+  public function prepareAcquiaCloudAPIClient() {
     $api_cred_file = getenv('HOME') . '/acquia_cloud_api_creds.php';
     if (!file_exists($api_cred_file)) {
-      throw new \Exception('Acquia cloud cred file acquia_cloud_api_creds.php missing at home directory.');
+      throw new BltException('Acquia cloud cred file acquia_cloud_api_creds.php missing at home directory.');
     }
 
     $_clientId = '';
@@ -441,6 +441,8 @@ class AcquiaCloudCronTasksCommand extends BltTasks {
         throw new BltException('Environment not passed and not available in ENV as well.');
       }
     }
+
+    $this->prepareAcquiaCloudAPIClient();
 
     $this->application_uuid = $this->getApplicationUuid($application);
     if (!$this->application_uuid) {
