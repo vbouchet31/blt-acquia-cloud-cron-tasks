@@ -11,7 +11,8 @@ To use this plugin on your existing BLT project, require the plugin with Compose
 `composer require vbouchet31/blt-acquia-cloud-cron-tasks`
 
 This plugin leverages [Acquia Cloud API](https://cloudapi-docs.acquia.com/). The plugin
-will look for a file `acquia_cloud_api_creds.php` in the HOME directory. Here is how
+will look for a file `acquia_cloud_api_creds.php` in the HOME directory which should contain [the client's ID and
+secret keys](https://docs.acquia.com/acquia-cloud/develop/api/auth/#generating-an-api-token). Here is how
 the file must be formatted for the plugin to load it:
 ```php
 <?php
@@ -19,6 +20,8 @@ the file must be formatted for the plugin to load it:
 $_clientId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx';
 $_clientSecret = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 ```
+The user who generated the client's ID and secret must have the permission to manage cron tasks on all the
+environments for the plugin to work.
 
 In your `blt.yml` file, create a new section:
 ```yaml
