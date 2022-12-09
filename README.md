@@ -35,6 +35,8 @@ crons:
 
 Run `blt acquia-cloud-cron-tasks:update {{application}} {{environment}}` to synchronize the
 cron tasks configured in `blt.yml` and the scheduled tasks configured on Acquia Cloud.
+(`blt acquia-cloud-cron-tasks:update customer dev` to synchronize the cron tasks on the `dev` environment of the 
+`customer` application for example.)
 Running this command will:
 - Delete the scheduled tasks which are configured on Acquia Cloud but not configured in
 `blt.yml`.
@@ -43,6 +45,10 @@ mapping is done based on the task's label.
 - Create the tasks which are in `blt.yml` but not on Acquia Cloud.
 
 The mapping between tasks listed in the configuration and tasks installed on Acquia Cloud is done via the label.
+
+The command can be executed from local machine but may also be added to a `post-code-update` or `post-code-deploy`
+[cloud hooks](https://docs.acquia.com/cloud-platform/develop/api/cloud-hooks/). With this second option, the cron
+tasks will automatically be synchronized on each code change.
 
 ## Advanced usage
 
