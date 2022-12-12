@@ -277,7 +277,7 @@ class AcquiaCloudCronTasksCommand extends BltTasks {
    * @return array
    */
   public function normalizeConfiguredCrons(array $crons = []) : array {
-    foreach ($crons as &$cron) {
+    foreach ($crons as $key => &$cron) {
       // Assuming default status is "Enabled" for task which status is not set.
       $cron['status'] = $cron['status'] ?? 1;
 
@@ -291,6 +291,30 @@ class AcquiaCloudCronTasksCommand extends BltTasks {
     }
 
     return $crons;
+  }
+
+  /**
+   * Helper function to validate the tasks loaded from the YML files.
+   *
+   * @param array $configured_crons
+   *   The crons loaded from the YML files.
+   *
+   * @return array
+   */
+  public function validateConfiguredCrons(array $configured_crons = []) : array {
+    $skipped_crons = [];
+    foreach ($configured_crons as $key => &$configured_cron) {
+      if (strlen($configured_cron['command']) > 255) {
+        $this->logger->warning('Scheduled task "' . $configured_cron['label'] . '"' . (isset($configured_cron['id']) ? ' (' . $configured_cron['id'] . ')' : '') . ' has a command which is longer than 255 characters. The task will be skipped to avoid it to be trimmed.');
+        $skipped_crons[] = $configured_cron;
+        unset($configured_crons[$key]);
+      }
+    }
+
+    return [
+      'normalized' => $configured_crons,
+      'skipped' => $skipped_crons,
+    ];
   }
 
   /**
@@ -465,9 +489,10 @@ class AcquiaCloudCronTasksCommand extends BltTasks {
 
     $this->getDefaultConfig($environment);
 
-    // Fetch the crons from the YML files.
+    // Fetch, normalize and validate the crons from the YML files.
     $configured_crons = $this->getConfiguredCrons($environment);
     $configured_crons = $this->normalizeConfiguredCrons($configured_crons);
+    list('validated' => $configured_crons, 'skipped' => $skipped_crons) = $this->validateConfiguredCrons($configured_crons);
 
     // Exit early if no crons have been found in YML files.
     if (empty($configured_crons)) {
@@ -479,6 +504,16 @@ class AcquiaCloudCronTasksCommand extends BltTasks {
     $crons_connector = new Crons($this->client);
     $acquia_crons = $crons_connector->getAll($this->environment_uuid);
     $acquia_crons = $this->normalizeAcquiaCrons($acquia_crons);
+
+    // Loop through the tasks which must be skipped and remove these from
+    // the list of Acquia crons to avoid these to be deleted.
+    if (!empty($skipped_crons)) {
+      foreach ($skipped_crons as $skipped_cron) {
+        if (isset($acquia_crons[$skipped_cron['label']])) {
+          unset($acquia_crons[$skipped_cron['label']]);
+        }
+      }
+    }
 
     // Generate the diff between crons from the API and the crons from the
     // YML files to determine which ones to create, edit or delete.
