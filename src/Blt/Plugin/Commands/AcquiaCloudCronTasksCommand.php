@@ -312,7 +312,7 @@ class AcquiaCloudCronTasksCommand extends BltTasks {
     }
 
     return [
-      'normalized' => $configured_crons,
+      'validated' => $configured_crons,
       'skipped' => $skipped_crons,
     ];
   }
